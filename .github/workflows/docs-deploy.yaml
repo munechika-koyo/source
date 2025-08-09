@@ -25,7 +25,7 @@ jobs:
       - name: 📝 Build docs
         run: pixi run -e docs doc-build
 
-      - name: Deploy 🚀
+      - name: 🚀 Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: docs/build/html
