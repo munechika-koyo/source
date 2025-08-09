@@ -62,3 +62,6 @@ target/
 
 # setuptools-scm
 raysect/_version.py
+
+# Lock files
+pixi.lock
