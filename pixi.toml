@@ -1,0 +1,118 @@
+[workspace]
+authors = ["munechika-koyo <munechika.koyo@gmail.com>"]
+channels = ["https://prefix.dev/conda-forge", "conda-forge"]
+name = "raysect-dev"
+platforms = ["linux-64", "osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+prebuild = { cmd = [
+  "python",
+  "$PIXI_PROJECT_ROOT/dev/generate_meson_files.py",
+], description = "🔄 Generate meson build files" }
+build = { env = { BUILD_PATH = "$PIXI_PROJECT_ROOT/build/$(python $PIXI_PROJECT_ROOT/dev/build/abi.py)" }, cmd = [
+  "meson",
+  "setup",
+  "$BUILD_PATH",
+  "&&",
+  "meson",
+  "compile",
+  "-C",
+  "$BUILD_PATH",
+], description = "🔧 Build cython extensions" }
+test = { cmd = [
+  "python",
+  "-m",
+  "unittest",
+  "-v",
+], description = "🧪 Run the tests" }
+install = { cmd = [
+  "python",
+  "-m",
+  "pip",
+  "install",
+  "--config-settings=editable-verbose=true",
+  "--no-deps",
+  "--no-build-isolation",
+  "--upgrade",
+  "--editable",
+  ".",
+], description = "📦 Install the package without dependencies" }
+uninstall = { cmd = [
+  "python",
+  "-m",
+  "pip",
+  "uninstall",
+  "-y",
+  "raysect",
+], description = "🗑️ Uninstall the package" }
+
+
+[build-dependencies]
+c-compiler = "*"
+
+[host-dependencies]
+pip = "*"
+python = ">=3.9"
+meson-python = "*"
+setuptools = ">=75.8.0,<76"
+setuptools-scm = "*"
+cython = ">=3.1,<4"
+
+[dependencies]
+numpy = "*"
+matplotlib = ">=3.10.0,<4"
+opencv = "*"
+
+# For development purposes
+ipython = "*"
+
+[feature.docs.dependencies]
+sphinx = "*"
+sphinx_rtd_theme = "*"
+
+[feature.docs.pypi-dependencies]
+raysect = { path = ".", editable = true }
+
+[feature.docs.pypi-options]
+no-build-isolation = ["raysect"]
+
+[feature.docs.tasks]
+doc-build = { cmd = [
+  "sphinx-build",
+  "-b",
+  "html",
+  "-j",
+  "auto",
+  "docs/source",
+  "docs/build/html",
+], description = "📝 Build the docs" }
+doc-clean = { cmd = [
+  "rm",
+  "-rf",
+  "docs/build",
+], description = "🔥 Clean the docs build directory" }
+doc-serve = { cmd = [
+  "python",
+  "-m",
+  "http.server",
+  "8000",
+  "--directory",
+  "docs/build/html",
+], description = "🚀 Start a local server for the docs" }
+
+[feature.py312.dependencies]
+python = "3.12.*"
+[feature.py313.dependencies]
+python = "3.13.*"
+
+[feature.lint.dependencies]
+ruff = "*"
+cython-lint = "*"
+
+[environments]
+# default = {}
+py312 = { features = ["py312"], solve-group = "py312" }
+py313 = { features = ["py313"], solve-group = "py313" }
+docs = { features = ["docs"], solve-group = "default" }
+lint = { features = ["lint"], no-default-feature = true }
