@@ -8,8 +8,8 @@ version = "0.1.0"
 [tasks]
 prebuild = { cmd = [
   "python",
-  "$PIXI_PROJECT_ROOT/dev/generate_meson_files.py",
-], description = "🔄 Generate meson build files" }
+  "dev/generate_meson_files.py",
+], description = "🔄 Generate meson.build files" }
 build = { env = { BUILD_PATH = "$PIXI_PROJECT_ROOT/build/$(python $PIXI_PROJECT_ROOT/dev/build/abi.py)" }, cmd = [
   "meson",
   "setup",
