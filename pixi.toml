@@ -47,6 +47,20 @@ uninstall = { cmd = [
   "raysect",
 ], description = "🗑️ Uninstall the package" }
 
+# Documentation tasks without Raysect installation
+doc-clean = { cmd = [
+  "rm",
+  "-rf",
+  "docs/build",
+], description = "🔥 Clean the docs build directory" }
+doc-serve = { cmd = [
+  "python",
+  "-m",
+  "http.server",
+  "8000",
+  "--directory",
+  "docs/build/html",
+], description = "🚀 Start a local server for the docs" }
 
 [build-dependencies]
 c-compiler = "*"
@@ -67,6 +81,7 @@ opencv = "*"
 # For development purposes
 ipython = "*"
 
+# === Documentation feature ===
 [feature.docs.dependencies]
 sphinx = "*"
 sphinx_rtd_theme = "*"
@@ -87,32 +102,21 @@ doc-build = { cmd = [
   "docs/source",
   "docs/build/html",
 ], description = "📝 Build the docs" }
-doc-clean = { cmd = [
-  "rm",
-  "-rf",
-  "docs/build",
-], description = "🔥 Clean the docs build directory" }
-doc-serve = { cmd = [
-  "python",
-  "-m",
-  "http.server",
-  "8000",
-  "--directory",
-  "docs/build/html",
-], description = "🚀 Start a local server for the docs" }
 
+# === Linting feature ===
+[feature.lint.dependencies]
+ruff = "*"
+cython-lint = "*"
+
+# === Python environment features ===
 [feature.py312.dependencies]
 python = "3.12.*"
 [feature.py313.dependencies]
 python = "3.13.*"
 
-[feature.lint.dependencies]
-ruff = "*"
-cython-lint = "*"
-
 [environments]
-# default = {}
-py312 = { features = ["py312"], solve-group = "py312" }
-py313 = { features = ["py313"], solve-group = "py313" }
-docs = { features = ["docs"], solve-group = "default" }
+# default = { features = ["py312"] }
+py312 = { features = ["py312"] }
+py313 = { features = ["py313"] }
+docs = { features = ["docs", "py313"] }
 lint = { features = ["lint"], no-default-feature = true }
