@@ -97,8 +97,6 @@ doc-build = { cmd = [
   "sphinx-build",
   "-b",
   "html",
-  "-j",
-  "auto",
   "docs/source",
   "docs/build/html",
 ], description = "📝 Build the docs" }
