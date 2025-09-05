@@ -2,8 +2,7 @@
 authors = ["munechika-koyo <munechika.koyo@gmail.com>"]
 channels = ["https://prefix.dev/conda-forge", "conda-forge"]
 name = "raysect-dev"
-platforms = ["linux-64", "osx-arm64"]
-version = "0.1.0"
+platforms = ["linux-64", "osx-arm64", "osx-64"]
 
 [tasks]
 prebuild = { cmd = [
@@ -107,13 +106,21 @@ ruff = "*"
 cython-lint = "*"
 
 # === Python environment features ===
+[feature.py39.dependencies]
+python = "3.9.*"
+[feature.py310.dependencies]
+python = "3.10.*"
+[feature.py311.dependencies]
+python = "3.11.*"
 [feature.py312.dependencies]
 python = "3.12.*"
 [feature.py313.dependencies]
 python = "3.13.*"
 
 [environments]
-# default = { features = ["py312"] }
+py39 = { features = ["py39"] }
+py310 = { features = ["py310"] }
+py311 = { features = ["py311"] }
 py312 = { features = ["py312"] }
 py313 = { features = ["py313"] }
 docs = { features = ["docs", "py313"] }
