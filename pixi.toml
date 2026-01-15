@@ -1,8 +1,53 @@
 [workspace]
-authors = ["munechika-koyo <munechika.koyo@gmail.com>"]
 channels = ["https://prefix.dev/conda-forge", "conda-forge"]
-name = "raysect-dev"
 platforms = ["linux-64", "osx-arm64", "osx-64"]
+preview = ["pixi-build"]
+
+# -------------------------------
+# === Packaging Configuration ===
+# -------------------------------
+[package]
+name = "raysect"
+version = "0.9.2"
+
+[package.build]
+backend = { name = "pixi-build-python", version = "*" }
+
+[package.build.config]
+noarch = false
+compilers = ["c"]
+env = { SETUPTOOLS_SCM_PRETEND_VERSION = "0.9.2" }
+extra-args = ["--config-settings=editable-verbose=true"]
+
+[workspace.build-variants]
+python = ["3.10.*", "3.11.*", "3.12.*", "3.13.*"]
+
+[package.build-dependencies]
+c-compiler = "*"
+meson = "*"
+ninja = "*"
+
+[package.host-dependencies]
+uv = "*"
+pkg-config = "*"
+python = "*"
+meson-python = "*"
+setuptools-scm = "*"
+cython = ">=3.1,<4"
+numpy = ">=2"
+
+[package.run-dependencies]
+matplotlib-base = ">=3.10.0,<4"
+opencv = "*"
+
+# ---------------------------------
+# === Development Configuration ===
+# ---------------------------------
+[dev]
+raysect = { path = "." }
+
+[dependencies]
+ipython = "*"
 
 [tasks]
 prebuild = { cmd = [
@@ -18,67 +63,36 @@ build = { env = { BUILD_PATH = "$PIXI_PROJECT_ROOT/build/$(python $PIXI_PROJECT_
   "compile",
   "-C",
   "$BUILD_PATH",
-], description = "🔧 Build cython extensions" }
-test = { cmd = [
-  "python",
-  "-m",
-  "unittest",
-  "-v",
-], description = "🧪 Run the tests" }
-install = { cmd = [
-  "python",
-  "-m",
-  "pip",
-  "install",
-  "--config-settings=editable-verbose=true",
-  "--no-deps",
-  "--no-build-isolation",
-  "--upgrade",
-  "--editable",
-  ".",
-], description = "📦 Install the package without dependencies" }
-uninstall = { cmd = [
-  "python",
-  "-m",
-  "pip",
-  "uninstall",
-  "-y",
-  "raysect",
-], description = "🗑️ Uninstall the package" }
+], description = "🔧 Build cython extensions", depends-on = [
+  "prebuild",
+] }
 
 # Documentation tasks without Raysect installation
 doc-clean = { cmd = [
   "rm",
   "-rf",
-  "docs/build",
-], description = "🔥 Clean the docs build directory" }
+  "build",
+], cwd = "docs", description = "🔥 Clean the docs build directory" }
 doc-serve = { cmd = [
   "python",
   "-m",
   "http.server",
   "8000",
   "--directory",
-  "docs/build/html",
-], description = "🚀 Start a local server for the docs" }
+  "build/html",
+], cwd = "docs", description = "🚀 Start a local server for the docs" }
 
-[build-dependencies]
-c-compiler = "*"
+# === Testing feature ===
+[feature.tests.dependencies]
+raysect = { path = "." }
 
-[host-dependencies]
-pip = "*"
-python = ">=3.9"
-meson-python = "*"
-setuptools = ">=75.8.0,<76"
-setuptools-scm = "*"
-cython = ">=3.1,<4"
-
-[dependencies]
-numpy = "*"
-matplotlib = ">=3.10.0,<4"
-opencv = "*"
-
-# For development purposes
-ipython = "*"
+[feature.tests.tasks]
+test = { cmd = [
+  "python",
+  "-m",
+  "unittest",
+  "-v",
+], description = "🧪 Run the tests" }
 
 # === Documentation feature ===
 [feature.docs.dependencies]
@@ -86,18 +100,17 @@ sphinx = "*"
 sphinx_rtd_theme = "*"
 
 [feature.docs.pypi-dependencies]
-raysect = { path = ".", editable = true }
-
-[feature.docs.pypi-options]
-no-build-isolation = ["raysect"]
+raysect = { path = "." }
 
 [feature.docs.tasks]
 doc-build = { cmd = [
   "sphinx-build",
   "-b",
-  "html",
-  "docs/source",
-  "docs/build/html",
+  "{{ target }}",
+  "source",
+  "build/{{ target }}",
+], cwd = "docs", args = [
+  { arg = "target", default = "html" },
 ], description = "📝 Build the docs" }
 
 # === Linting feature ===
@@ -106,22 +119,18 @@ ruff = "*"
 cython-lint = "*"
 
 # === Python environment features ===
-[feature.py39.dependencies]
-python = "3.9.*"
 [feature.py310.dependencies]
 python = "3.10.*"
-[feature.py311.dependencies]
-python = "3.11.*"
-[feature.py312.dependencies]
-python = "3.12.*"
 [feature.py313.dependencies]
 python = "3.13.*"
 
 [environments]
-py39 = { features = ["py39"] }
-py310 = { features = ["py310"] }
-py311 = { features = ["py311"] }
-py312 = { features = ["py312"] }
-py313 = { features = ["py313"] }
-docs = { features = ["docs", "py313"] }
+default = { features = ["py313"], solve-group = "py313" }
+docs = { features = ["py313", "docs"], solve-group = "py313" }
+tests = { features = ["py313", "tests"], solve-group = "py313" }
+tests-py313 = { features = [
+  "py313",
+  "tests",
+], solve-group = "py313" } # alias of tests
+tests-py310 = ["py310", "tests"]
 lint = { features = ["lint"], no-default-feature = true }
